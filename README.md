@@ -1,4 +1,4 @@
-# Claude-Tools
+# Claude LLM Tools
 
 A library for auto-generating JSON Schema and dispatching tool calls in applications
 that use the Anthropic API to interact with Claude.
@@ -12,11 +12,11 @@ pip install claude-tools
 
 ```python
 import anthropic
-import claude_tools
+import claude_llm_tools
 
 
-@claude_tools.tool
-def add_numbers(req: claude_tools.Request, a: int, b: int) -> int:
+@claude_llm_tools.tool
+def add_numbers(req: claude_llm_tools.Request, a: int, b: int) -> int:
     """
     Add two numbers together and return the result.
 
@@ -34,7 +34,7 @@ def add_numbers(req: claude_tools.Request, a: int, b: int) -> int:
 client = anthropic.Anthropic()
 
 # You can implement the Anthropic text editor contract
-claude_tools.add_tool(..., tool_type='text_editor_20250124')
+claude_llm_tools.add_tool(..., tool_type='text_editor_20250124')
 
 message = client.messages.create(
     model="claude-3-7-sonnet-20250219",
@@ -52,7 +52,7 @@ message = client.messages.create(
             ]
         }
     ],
-    tools=claude_tools.tools()
+    tools=claude_llm_tools.tools()
 )
 
 for block in message.content:
@@ -60,7 +60,7 @@ for block in message.content:
         case 'text':
             ...
         case 'tool_use':
-            result = await claude_tools.dispatch(block)
+            result = await claude_llm_tools.dispatch(block)
 
 
 ```

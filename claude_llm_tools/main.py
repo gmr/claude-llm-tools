@@ -6,7 +6,7 @@ import typing
 import jsonschema_models as jsm
 from anthropic import types
 
-from claude_tools import jsonschema, models, state
+from claude_llm_tools import jsonschema, models, state
 
 LOGGER = logging.getLogger(__name__)
 

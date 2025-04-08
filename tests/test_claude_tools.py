@@ -5,12 +5,12 @@ from unittest import mock
 import jsonschema_models
 from anthropic import types
 
-import claude_tools
-from claude_tools import models, state
+import claude_llm_tools
+from claude_llm_tools import models, state
 
 
-@claude_tools.tool
-def add_numbers(_req: claude_tools.Request, a: int, b: int) -> int:
+@claude_llm_tools.tool
+def add_numbers(_req: claude_llm_tools.Request, a: int, b: int) -> int:
     """
     Add two numbers together and return the result.
 
@@ -24,8 +24,8 @@ def add_numbers(_req: claude_tools.Request, a: int, b: int) -> int:
     return a + b
 
 
-@claude_tools.tool
-def multiply_numbers(_req: claude_tools.Request, a: int, b: int) -> int:
+@claude_llm_tools.tool
+def multiply_numbers(_req: claude_llm_tools.Request, a: int, b: int) -> int:
     """
     Multiply two numbers together and return the result.
 
@@ -85,7 +85,7 @@ class TestCase(unittest.TestCase):
                 'name': 'multiply_numbers',
             },
         ]
-        self.assertEqual(claude_tools.tools(), expectation)
+        self.assertEqual(claude_llm_tools.tools(), expectation)
 
 
 class TestAdditionalCoverage(unittest.TestCase):
@@ -102,12 +102,14 @@ class TestAdditionalCoverage(unittest.TestCase):
     def test_add_tool(self):
         """Test manually adding a tool."""
 
-        def sample_function(request: claude_tools.Request, param1: str) -> str:
+        def sample_function(
+            request: claude_llm_tools.Request, param1: str
+        ) -> str:
             """Sample function docstring."""
             return f'Processed: {param1}'
 
         # Add the tool manually
-        claude_tools.add_tool(sample_function)
+        claude_llm_tools.add_tool(sample_function)
 
         # Verify the tool was added
         tool = state.get_tool('sample_function')
@@ -119,11 +121,13 @@ class TestAdditionalCoverage(unittest.TestCase):
     def test_add_tool_with_custom_name(self):
         """Test manually adding a tool with a custom name."""
 
-        def sample_function(request: claude_tools.Request, param1: str) -> str:
+        def sample_function(
+            request: claude_llm_tools.Request, param1: str
+        ) -> str:
             return f'Processed: {param1}'
 
         # Add the tool with a custom name
-        claude_tools.add_tool(sample_function, name='custom_name')
+        claude_llm_tools.add_tool(sample_function, name='custom_name')
 
         # Verify the tool was added with the custom name
         tool = state.get_tool('custom_name')
@@ -133,12 +137,16 @@ class TestAdditionalCoverage(unittest.TestCase):
     def test_add_tool_with_custom_description(self):
         """Test manually adding a tool with a custom description."""
 
-        def sample_function(request: claude_tools.Request, param1: str) -> str:
+        def sample_function(
+            request: claude_llm_tools.Request, param1: str
+        ) -> str:
             return f'Processed: {param1}'
 
         # Add the tool with a custom description
         custom_description = 'This is a custom description'
-        claude_tools.add_tool(sample_function, description=custom_description)
+        claude_llm_tools.add_tool(
+            sample_function, description=custom_description
+        )
 
         # Verify the tool was added with the custom description
         tool = state.get_tool('sample_function')
@@ -147,7 +155,9 @@ class TestAdditionalCoverage(unittest.TestCase):
     def test_add_tool_with_custom_input_schema(self):
         """Test manually adding a tool with a custom input schema."""
 
-        def sample_function(request: claude_tools.Request, param1: str) -> str:
+        def sample_function(
+            request: claude_llm_tools.Request, param1: str
+        ) -> str:
             return f'Processed: {param1}'
 
         # Create a custom input schema
@@ -160,7 +170,7 @@ class TestAdditionalCoverage(unittest.TestCase):
         )
 
         # Add the tool with the custom input schema
-        claude_tools.add_tool(sample_function, input_schema=custom_schema)
+        claude_llm_tools.add_tool(sample_function, input_schema=custom_schema)
 
         # Verify the tool was added with the custom input schema
         tool = state.get_tool('sample_function')
@@ -169,12 +179,14 @@ class TestAdditionalCoverage(unittest.TestCase):
     def test_add_tool_with_tool_type(self):
         """Test manually adding a tool with a custom tool type."""
 
-        def sample_function(request: claude_tools.Request, param1: str) -> str:
+        def sample_function(
+            request: claude_llm_tools.Request, param1: str
+        ) -> str:
             return f'Processed: {param1}'
 
         # Add the tool with a custom tool type
         custom_tool_type = 'custom_type'
-        claude_tools.add_tool(sample_function, tool_type=custom_tool_type)
+        claude_llm_tools.add_tool(sample_function, tool_type=custom_tool_type)
 
         # Verify the tool was added with the custom tool type
         tool = state.get_tool('sample_function')
@@ -183,7 +195,9 @@ class TestAdditionalCoverage(unittest.TestCase):
 
     def test_error_result(self):
         """Test creating an error result."""
-        result = claude_tools.error_result('tool123', 'Something went wrong')
+        result = claude_llm_tools.error_result(
+            'tool123', 'Something went wrong'
+        )
 
         self.assertEqual(result.tool_use_id, 'tool123')
         self.assertEqual(result.content, 'Error: Something went wrong')
@@ -192,7 +206,9 @@ class TestAdditionalCoverage(unittest.TestCase):
 
     def test_success_result(self):
         """Test creating a success result."""
-        result = claude_tools.success_result('tool123', 'Operation successful')
+        result = claude_llm_tools.success_result(
+            'tool123', 'Operation successful'
+        )
 
         self.assertEqual(result.tool_use_id, 'tool123')
         self.assertEqual(result.content, 'Operation successful')
@@ -203,11 +219,11 @@ class TestAdditionalCoverage(unittest.TestCase):
         """Test dispatching a tool call."""
 
         # Define a test tool
-        @claude_tools.tool
+        @claude_llm_tools.tool
         async def test_tool(
-            request: claude_tools.Request, param: str
+            request: claude_llm_tools.Request, param: str
         ) -> models.Result:
-            return claude_tools.success_result(
+            return claude_llm_tools.success_result(
                 request.tool_use.id,
                 f'Tool {request.tool_use.name} called with '
                 f'input: {request.tool_use.input}',
@@ -220,7 +236,7 @@ class TestAdditionalCoverage(unittest.TestCase):
         tool_use.input = {'param': 'value'}
 
         # Dispatch the tool call
-        result = await claude_tools.dispatch(tool_use)
+        result = await claude_llm_tools.dispatch(tool_use)
 
         # Verify the result
         self.assertEqual(result['tool_use_id'], 'tool123')
@@ -238,9 +254,9 @@ class TestAdditionalCoverage(unittest.TestCase):
         tool_use.name = 'unknown_tool'
 
         # Patch state.get_tool to return None instead of raising ValueError
-        with mock.patch('claude_tools.state.get_tool', return_value=None):
+        with mock.patch('claude_llm_tools.state.get_tool', return_value=None):
             # Dispatch the tool call
-            result = await claude_tools.dispatch(tool_use)
+            result = await claude_llm_tools.dispatch(tool_use)
 
             # Verify the result is an error
             self.assertEqual(result['tool_use_id'], 'tool123')

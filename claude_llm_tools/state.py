@@ -2,7 +2,7 @@
 
 import typing
 
-from claude_tools import models
+from claude_llm_tools import models
 
 
 class State:

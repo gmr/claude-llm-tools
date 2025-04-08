@@ -2,7 +2,7 @@ import json
 import typing
 import unittest
 
-from claude_tools import jsonschema, models
+from claude_llm_tools import jsonschema, models
 
 
 class TestTypeToJsonSchema(unittest.TestCase):

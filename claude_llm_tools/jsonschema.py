@@ -4,7 +4,7 @@ import typing
 
 import jsonschema_models as jsm
 
-from claude_tools import models
+from claude_llm_tools import models
 
 
 def _type_to_schema(value: typing.Any) -> jsm.Schema:

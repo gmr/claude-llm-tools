@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "claude-tools"
+name = "claude-llm-tools"
 version = "0.1.0"
 description = "A library for auto-generating JSON Schema and dispatching tool calls in applications that use the Anthropic API to interact with Claude."
 readme = "README.md"
@@ -26,14 +26,14 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/gmr/claude-tools"
-"Bug Tracker" = "https://github.com/gmr/claude-tools/issues"
+"Homepage" = "https://github.com/gmr/claude-llm-tools"
+"Bug Tracker" = "https://github.com/gmr/claude-llm-tools/issues"
 
 [tool.hatch.build.targets.wheel]
-include = ["claude_tools"]
+include = ["claude_llm_tools"]
 
 [tool.hatch.build.force-include]
-"claude_tools/py.typed" = "claude_tools/py.typed"
+"claude_llm_tools/py.typed" = "claude_llm_tools/py.typed"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
