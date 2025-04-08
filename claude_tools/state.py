@@ -8,11 +8,11 @@ from claude_tools import models
 class State:
     _instance: typing.Self | None = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.tools: list[models.Tool] = []
 
     @classmethod
-    def get_instance(cls) -> 'State':
+    def get_instance(cls) -> typing.Self:
         if not cls._instance:
             cls._instance = cls()
         return cls._instance

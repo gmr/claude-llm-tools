@@ -65,7 +65,7 @@ async def dispatch(
         ).model_dump()
     kwargs = tool_use.input if tool_use.input else {}
     try:
-        result = await obj.callable(request, **kwargs)
+        result = await obj.callable(request, **kwargs)  # type: ignore
     except TypeError as err:
         return error_result(
             tool_use.id, f'Exception raised: {str(err)}'
