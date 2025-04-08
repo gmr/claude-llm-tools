@@ -5,7 +5,7 @@ that use the Anthropic API to interact with Claude.
 
 ## Installation
 ```shell
-pip install claude-tools
+pip install claude-llm-tools
 ```
 
 ## Usage
@@ -61,6 +61,4 @@ for block in message.content:
             ...
         case 'tool_use':
             result = await claude_llm_tools.dispatch(block)
-
-
 ```
