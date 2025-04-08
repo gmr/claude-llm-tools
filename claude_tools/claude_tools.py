@@ -78,8 +78,6 @@ def tools() -> list[dict]:
     to the LLM.
 
     """
-    from claude_tools import state
-
     result = []
     for entry in state.get_tools():
         tool_dict = json.loads(

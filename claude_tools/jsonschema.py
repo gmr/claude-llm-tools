@@ -37,7 +37,6 @@ def _type_to_schema(value: typing.Any) -> jsm.Schema:
         return jsm.Schema.model_validate({'type': type(args[0]), 'enum': args})
     elif origin is typing.Union or origin is types.UnionType:
         return _handle_union_type(value)
-
     raise RuntimeError(f'Unsupported type {value} / {origin} / {args}')
 
 
@@ -59,15 +58,7 @@ def _handle_union_type(param_type: typing.Any) -> jsm.Schema:
 
 
 def to_schema(func: typing.Callable) -> jsm.Schema:
-    """Convert a function's signature to JSON Schema.
-
-    Args:
-        func: Function to inspect
-
-    Returns:
-        Dictionary containing JSON Schema
-
-    """
+    """Convert a function's signature to JSON Schema."""
     sig = inspect.signature(func)
     type_hints = typing.get_type_hints(func)
     properties = {}
