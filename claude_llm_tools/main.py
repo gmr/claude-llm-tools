@@ -54,7 +54,7 @@ def tool(function: Function) -> Function:
 
 
 async def dispatch(
-    tool_use: [types.ToolUseBlock, beta_types.BetaToolUseBlock],
+    tool_use: types.ToolUseBlock | beta_types.BetaToolUseBlock,
     context: typing.Any | None = None,
 ) -> dict:
     """Invoke this with the ToolUseBlock from the LLM to call the tool."""
