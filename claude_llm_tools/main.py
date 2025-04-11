@@ -5,6 +5,7 @@ import typing
 
 import jsonschema_models as jsm
 from anthropic import types
+from anthropic.types import beta as beta_types
 
 from claude_llm_tools import jsonschema, models, state
 
@@ -53,7 +54,8 @@ def tool(function: Function) -> Function:
 
 
 async def dispatch(
-    tool_use: types.ToolUseBlock, context: typing.Any | None = None
+    tool_use: [types.ToolUseBlock, beta_types.BetaToolUseBlock],
+    context: typing.Any | None = None,
 ) -> dict:
     """Invoke this with the ToolUseBlock from the LLM to call the tool."""
     LOGGER.debug('Tool Use: %r', tool_use)
