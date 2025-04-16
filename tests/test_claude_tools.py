@@ -6,7 +6,7 @@ import jsonschema_models
 from anthropic import types
 
 import claude_llm_tools
-from claude_llm_tools import models, state
+from claude_llm_tools import state
 
 
 @claude_llm_tools.tool
@@ -193,41 +193,15 @@ class TestAdditionalCoverage(unittest.TestCase):
         self.assertEqual(tool.type, custom_tool_type)
         self.assertIsNone(tool.input_schema)
 
-    def test_error_result(self):
-        """Test creating an error result."""
-        result = claude_llm_tools.error_result(
-            'tool123', 'Something went wrong'
-        )
-
-        self.assertEqual(result.tool_use_id, 'tool123')
-        self.assertEqual(result.content, 'Error: Something went wrong')
-        self.assertTrue(result.is_error)
-        self.assertEqual(result.type, 'tool_result')
-
-    def test_success_result(self):
-        """Test creating a success result."""
-        result = claude_llm_tools.success_result(
-            'tool123', 'Operation successful'
-        )
-
-        self.assertEqual(result.tool_use_id, 'tool123')
-        self.assertEqual(result.content, 'Operation successful')
-        self.assertFalse(result.is_error)
-        self.assertEqual(result.type, 'tool_result')
-
     async def async_test_dispatch(self):
         """Test dispatching a tool call."""
 
         # Define a test tool
         @claude_llm_tools.tool
         async def test_tool(
-            request: claude_llm_tools.Request, param: str
-        ) -> models.Result:
-            return claude_llm_tools.success_result(
-                request.tool_use.id,
-                f'Tool {request.tool_use.name} called with '
-                f'input: {request.tool_use.input}',
-            )
+            _request: claude_llm_tools.Request, param: str
+        ) -> str:
+            return param
 
         # Create a mock ToolUseBlock
         tool_use = mock.Mock(spec=types.ToolUseBlock)
@@ -238,12 +212,9 @@ class TestAdditionalCoverage(unittest.TestCase):
         # Dispatch the tool call
         result = await claude_llm_tools.dispatch(tool_use)
 
-        # Verify the result
+        self.assertEqual(result['type'], 'tool_result')
         self.assertEqual(result['tool_use_id'], 'tool123')
-        self.assertEqual(
-            result['content'],
-            "Tool test_tool called with input: {'param': 'value'}",
-        )
+        self.assertEqual(result['content'], 'value')
         self.assertFalse(result['is_error'])
 
     async def async_test_dispatch_unknown_tool(self):

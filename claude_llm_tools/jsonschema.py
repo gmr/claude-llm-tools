@@ -1,3 +1,4 @@
+import enum
 import inspect
 import types
 import typing
@@ -37,6 +38,10 @@ def _type_to_schema(value: typing.Any) -> jsm.Schema:
         return jsm.Schema.model_validate({'type': type(args[0]), 'enum': args})
     elif origin is typing.Union or origin is types.UnionType:
         return _handle_union_type(value)
+    elif type(value) is enum.EnumType:
+        return jsm.Schema.model_validate(
+            {'type': 'string', 'enum': list(value.__members__)}
+        )
     raise RuntimeError(f'Unsupported type {value} / {origin} / {args}')
 
 

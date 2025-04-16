@@ -31,6 +31,16 @@ def add_numbers(req: claude_llm_tools.Request, a: int, b: int) -> int:
     return a + b
 
 
+@claude_llm_tools.tool(
+    name='multiply_numbers',
+    description='Multiply two numbers together and return the product.'
+)
+def multiply(req: claude_llm_tools.Request, x: int, y: int) -> int:
+    """This docstring will be overridden by the description parameter above."""
+    print(req.tool_use.id)
+    return x * y
+
+
 client = anthropic.Anthropic()
 
 # You can implement the Anthropic text editor contract

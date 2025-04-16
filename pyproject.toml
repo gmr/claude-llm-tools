@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "claude-llm-tools"
-version = "0.2.0"
+version = "0.3.0"
 description = "A library for auto-generating JSON Schema and dispatching tool calls in applications that use the Anthropic API to interact with Claude."
 readme = "README.md"
 requires-python = ">=3.12"
 license = 'BSD-3-clause'
-license-files =  ["LICENSE"]
+license-files = ["LICENSE"]
 authors = [{ name = "Gavin M. Roy", email = "gavinr@aweber.com" }]
 classifiers = [
     "Development Status :: 3 - Alpha",
@@ -66,25 +66,25 @@ skip-magic-trailing-comma = true
 
 [tool.ruff.lint]
 select = [
-    "ASYNC",  # flake8-async
-    "B",      # flake8-bugbear
-    "BLE",    # flake8-blind-except
-    "C4",     # flake8-comprehensions
-    "DTZ",    # flake8-datetimez
+    "ASYNC", # flake8-async
+    "B", # flake8-bugbear
+    "BLE", # flake8-blind-except
+    "C4", # flake8-comprehensions
+    "DTZ", # flake8-datetimez
     "E", "W", # pycodestyle
-    "F",      # pyflakes
-    "G",      # flake8-logging-format
-    "I",      # isort
-    "S",      # flake8-bandit
-    "T20",    # flake8-print
-    "UP",     # pyupgrade
-    "F401",   # unused imports
-    "F841",   # unused variables
-    "B027",   # empty method in abstract base class
-    "B905",   # zip() without explicit strict parameter
+    "F", # pyflakes
+    "G", # flake8-logging-format
+    "I", # isort
+    "S", # flake8-bandit
+    "T20", # flake8-print
+    "UP", # pyupgrade
+    "F401", # unused imports
+    "F841", # unused variables
+    "B027", # empty method in abstract base class
+    "B905", # zip() without explicit strict parameter
 ]
 ignore = [
-  "RSE",      # contradicts Python Style Guide
+    "RSE", # contradicts Python Style Guide
 ]
 flake8-quotes = { inline-quotes = "single" }
-isort.split-on-trailing-comma=false
+isort.split-on-trailing-comma = false

@@ -34,3 +34,12 @@ class Tool(pydantic.BaseModel):
     description: str | None = None
     input_schema: jsm.Schema | None = None
     type: str | None = None
+    response_validator: typing.Callable | None = None
+
+    def model_dump(self, *args, **kwargs) -> dict:
+        """Ensure that the model doesn't include callables when dumping"""
+        return super().model_dump(
+            exclude={'callable', 'response_validator'},
+            exclude_none=True,
+            by_alias=True,
+        )
