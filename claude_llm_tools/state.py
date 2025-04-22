@@ -33,6 +33,13 @@ def get_tool(name: str) -> models.Tool | None:
     raise ValueError('Tool not found')
 
 
+def get_tool_name(function: typing.Callable) -> str:
+    for tool in get_tools():
+        if tool.callable == function:
+            return tool.name
+    raise ValueError('Tool not found')
+
+
 def get_tools() -> list[models.Tool]:
     """Return the list of registered tools."""
     return State.get_instance().tools
