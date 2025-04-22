@@ -6,13 +6,13 @@ from claude_llm_tools import models
 
 
 class State:
-    _instance: typing.Self | None = None
+    _instance: 'State | None' = None
 
     def __init__(self) -> None:
         self.tools: list[models.Tool] = []
 
     @classmethod
-    def get_instance(cls) -> typing.Self:
+    def get_instance(cls) -> 'State':
         if not cls._instance:
             cls._instance = cls()
         return cls._instance
