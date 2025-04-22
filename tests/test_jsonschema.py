@@ -1,3 +1,4 @@
+import enum
 import json
 import typing
 import unittest
@@ -36,6 +37,9 @@ class TestTypeToJsonSchema(unittest.TestCase):
 
     def test_list_type(self):
         """Test converting List types to JSON schema."""
+        schema = jsonschema._type_to_schema(list)
+        self.assertEqual(schema.model_dump(), {'type': 'array'})
+
         schema = jsonschema._type_to_schema(list[str])
         self.assertEqual(
             schema.model_dump(), {'type': 'array', 'items': {'type': 'string'}}
@@ -45,6 +49,12 @@ class TestTypeToJsonSchema(unittest.TestCase):
         self.assertEqual(
             schema.model_dump(),
             {'type': 'array', 'items': {'type': 'integer'}},
+        )
+
+        schema = jsonschema._type_to_schema(list[str | int])
+        self.assertEqual(
+            schema.model_dump(),
+            {'type': 'array', 'items': {'type': ['string', 'integer']}},
         )
 
     def test_dict_type(self):
@@ -103,6 +113,15 @@ class TestTypeToJsonSchema(unittest.TestCase):
             },
         )
 
+    def test_unsupported_type(self):
+        """Test handling unsupported types."""
+
+        class CustomClass:
+            pass
+
+        with self.assertRaises(RuntimeError):
+            jsonschema._type_to_schema(CustomClass)
+
     def test_optional_type(self):
         """Test converting Optional types to JSON schema."""
         schema = jsonschema._type_to_schema(str | None)
@@ -110,6 +129,20 @@ class TestTypeToJsonSchema(unittest.TestCase):
 
         schema = jsonschema._type_to_schema(int | None)
         self.assertEqual(schema.model_dump(), {'type': ['integer', 'null']})
+
+    def test_enum_type(self):
+        """Test converting Enum types to JSON schema."""
+
+        class Color(enum.Enum):
+            RED = 'red'
+            GREEN = 'green'
+            BLUE = 'blue'
+
+        schema = jsonschema._type_to_schema(Color)
+        self.assertEqual(
+            schema.model_dump(),
+            {'type': 'string', 'enum': ['RED', 'GREEN', 'BLUE']},
+        )
 
 
 class TestHandleUnionType(unittest.TestCase):
@@ -225,5 +258,37 @@ class TestToJsonSchema(unittest.TestCase):
                 },
             },
             'required': ['a', 'b', 'c', 'd', 'e'],
+        }
+        self.assertEqual(schema.model_dump(), expected)
+
+    def test_function_with_missing_type_hints(self):
+        """Test converting a function with missing type hints."""
+
+        def test_func(a, b):
+            """Function with no type hints."""
+            return a + b
+
+        schema = jsonschema.to_schema(test_func)
+        expected = {
+            'type': 'object',
+            'properties': {'a': {'title': 'A'}, 'b': {'title': 'B'}},
+            'required': ['a', 'b'],
+        }
+        self.assertEqual(schema.model_dump(), expected)
+
+    def test_function_with_no_required_params(self):
+        """Test converting a function with no required parameters."""
+
+        def test_func(a: int = 1, b: str = 'test'):
+            """Function with all optional parameters."""
+            return f'{a} {b}'
+
+        schema = jsonschema.to_schema(test_func)
+        expected = {
+            'type': 'object',
+            'properties': {
+                'a': {'type': 'integer', 'title': 'A'},
+                'b': {'type': 'string', 'title': 'B'},
+            },
         }
         self.assertEqual(schema.model_dump(), expected)

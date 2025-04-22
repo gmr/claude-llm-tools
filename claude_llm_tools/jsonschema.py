@@ -28,6 +28,8 @@ def _type_to_schema(value: typing.Any) -> jsm.Schema:
             }
         )
     elif origin is list:
+        if not args:
+            return jsm.Schema.model_validate({'type': 'array'})
         items = (
             _handle_union_type(value)
             if len(args) > 1
@@ -38,7 +40,7 @@ def _type_to_schema(value: typing.Any) -> jsm.Schema:
         return jsm.Schema.model_validate({'type': type(args[0]), 'enum': args})
     elif origin is typing.Union or origin is types.UnionType:
         return _handle_union_type(value)
-    elif type(value) is enum.EnumType:
+    elif isinstance(value, enum.EnumMeta):
         return jsm.Schema.model_validate(
             {'type': 'string', 'enum': list(value.__members__)}
         )

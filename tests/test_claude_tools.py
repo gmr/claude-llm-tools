@@ -243,3 +243,157 @@ class TestAdditionalCoverage(unittest.TestCase):
     def test_dispatch_unknown_tool(self):
         """Run the async dispatch unknown tool test."""
         asyncio.run(self.async_test_dispatch_unknown_tool())
+
+    def test_result_to_str(self):
+        """Test the _result_to_str function with different types."""
+        from claude_llm_tools import models
+        from claude_llm_tools.main import _result_to_str
+
+        result = models.Result(tool_use_id='123', content='test')
+        self.assertTrue(isinstance(_result_to_str(result), str))
+
+        result = {'key': 'value'}
+        self.assertEqual(_result_to_str(result), '{"key": "value"}')
+
+        result = ['item1', 'item2']
+        self.assertEqual(_result_to_str(result), '[item1,item2]')
+
+        self.assertEqual(_result_to_str('test'), 'test')
+
+    async def async_test_dispatch_with_validation_error(self):
+        """Test dispatching a tool call with a validation error."""
+
+        # Define a test tool with a validator that raises an error
+        def validator(_request, _result):
+            raise claude_llm_tools.ValidationError('Invalid result')
+
+        @claude_llm_tools.tool(response_validator=validator)
+        async def validation_test_tool(
+            _request: claude_llm_tools.Request, param: str
+        ) -> str:
+            return param
+
+        # Create a mock ToolUseBlock
+        tool_use = mock.Mock(spec=types.ToolUseBlock)
+        tool_use.id = 'tool123'
+        tool_use.name = 'validation_test_tool'
+        tool_use.input = {'param': 'value'}
+
+        # Dispatch the tool call
+        result = await claude_llm_tools.dispatch(tool_use)
+
+        # Verify the result is an error
+        self.assertEqual(result['type'], 'tool_result')
+        self.assertEqual(result['tool_use_id'], 'tool123')
+        self.assertTrue(result['is_error'])
+        self.assertTrue(
+            'Exception raised: Invalid result' in result['content']
+        )
+
+    def test_dispatch_with_validation_error(self):
+        """Run the async dispatch validation error test."""
+        asyncio.run(self.async_test_dispatch_with_validation_error())
+
+    async def async_test_dispatch_with_tool_error(self):
+        """Test dispatching a tool call with a tool error."""
+
+        # Define a test tool that raises a ToolError
+        @claude_llm_tools.tool
+        async def error_test_tool(
+            _request: claude_llm_tools.Request, param: str
+        ) -> str:
+            raise claude_llm_tools.ToolError('Tool execution failed')
+
+        # Create a mock ToolUseBlock
+        tool_use = mock.Mock(spec=types.ToolUseBlock)
+        tool_use.id = 'tool123'
+        tool_use.name = 'error_test_tool'
+        tool_use.input = {'param': 'value'}
+
+        # Dispatch the tool call
+        result = await claude_llm_tools.dispatch(tool_use)
+
+        # Verify the result is an error
+        self.assertEqual(result['type'], 'tool_result')
+        self.assertEqual(result['tool_use_id'], 'tool123')
+        self.assertTrue(result['is_error'])
+        self.assertTrue(
+            'Exception raised: Tool execution failed' in result['content']
+        )
+
+        @claude_llm_tools.tool
+        async def type_error_test_tool(
+            _request: claude_llm_tools.Request, param: str
+        ) -> str:
+            raise TypeError('Type error occurred')
+
+        tool_use.name = 'type_error_test_tool'
+        result = await claude_llm_tools.dispatch(tool_use)
+        self.assertTrue(result['is_error'])
+
+    def test_dispatch_with_tool_error(self):
+        """Run the async dispatch tool error test."""
+        asyncio.run(self.async_test_dispatch_with_tool_error())
+
+    def test_get_tool_name(self):
+        """Test getting a tool name by its callable."""
+        # Save the original tools registry
+        _original_tools = state.State.get_instance().tools.copy()
+
+        # Clear the tools registry
+        state.State.get_instance().tools = []
+
+        try:
+            # Define a test function
+            def test_function(
+                request: claude_llm_tools.Request, param: str
+            ) -> str:
+                return param
+
+            # Add the tool
+            claude_llm_tools.add_tool(test_function, name='test_function_name')
+
+            self.assertEqual(
+                state.get_tool_name(test_function), 'test_function_name'
+            )
+
+            def another_function(request: claude_llm_tools.Request) -> str:
+                return 'result'
+
+            with self.assertRaises(ValueError):
+                state.get_tool_name(another_function)
+        finally:
+            # Restore the original tools registry
+            state.State.get_instance().tools = _original_tools
+
+    def test_add_tool_duplicate(self):
+        """Test adding a tool with a duplicate name."""
+        # Save the original tools registry
+        _original_tools = state.State.get_instance().tools.copy()
+
+        # Clear the tools registry
+        state.State.get_instance().tools = []
+
+        try:
+
+            def first_function(
+                request: claude_llm_tools.Request, param: str
+            ) -> str:
+                return f'First: {param}'
+
+            def second_function(
+                request: claude_llm_tools.Request, param: str
+            ) -> str:
+                return f'Second: {param}'
+
+            # Add the first tool
+            claude_llm_tools.add_tool(first_function, name='duplicate_name')
+
+            claude_llm_tools.add_tool(second_function, name='duplicate_name')
+
+            # Verify that the first one remains and the second was not added
+            tool = state.get_tool('duplicate_name')
+            self.assertEqual(tool.callable, first_function)
+        finally:
+            # Restore the original tools registry
+            state.State.get_instance().tools = _original_tools
