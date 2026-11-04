@@ -7,7 +7,7 @@ import jsonschema_models as jsm
 from anthropic import types
 from anthropic.types import beta as beta_types
 
-from claude_llm_tools import errors, jsonschema, models, state
+from claude_llm_tools import docstring, errors, jsonschema, models, state
 
 LOGGER = logging.getLogger(__name__)
 
@@ -26,17 +26,19 @@ def add_tool(
 
     :param function: The function to call when the tool is invoked
     :param name: The optional tool name
-    :param description: The optional tool description
-    :param input_schema: The optional input schema for the tool
+    :param description: The optional tool description, defaulting to the
+        docstring without its Args, Returns, Yields, and Raises sections
+    :param input_schema: The optional input schema for the tool, defaulting
+        to one built from the signature and the docstring's Args section
     :param tool_type: The optional tool type
     :param response_validator: The optional response validator
 
     """
     name = name or function.__name__
     if not tool_type:
-        description = description or inspect.getdoc(function)
-        schema = jsonschema.to_schema(function)
-        input_schema = input_schema or jsm.Schema.model_validate(schema)
+        parsed = docstring.parse(inspect.getdoc(function))
+        description = description or parsed.description
+        input_schema = input_schema or jsonschema.to_schema(function)
     state.add_tool(
         models.Tool(
             name=name,

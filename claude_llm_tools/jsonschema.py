@@ -5,7 +5,7 @@ import typing
 
 import jsonschema_models as jsm
 
-from claude_llm_tools import models
+from claude_llm_tools import docstring, models
 
 
 def _type_to_schema(value: typing.Any) -> jsm.Schema:
@@ -67,6 +67,7 @@ def to_schema(func: typing.Callable) -> jsm.Schema:
     """Convert a function's signature to JSON Schema."""
     sig = inspect.signature(func)
     type_hints = typing.get_type_hints(func)
+    arguments = docstring.parse(inspect.getdoc(func)).arguments
     properties = {}
     required = []
     for name, param in sig.parameters.items():
@@ -76,6 +77,7 @@ def to_schema(func: typing.Callable) -> jsm.Schema:
         if name in type_hints:
             schema = _type_to_schema(type_hints[name])
         schema.title = name.capitalize()
+        schema.description = arguments.get(name)
         if param.default is inspect.Parameter.empty:
             required.append(name)
         properties[name] = schema

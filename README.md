@@ -72,3 +72,10 @@ for block in message.content:
         case 'tool_use':
             result = await claude_llm_tools.dispatch(block)
 ```
+
+### Descriptions
+
+The tool description defaults to the docstring with its `Args`, `Returns`,
+`Yields`, and `Raises` sections removed. Each `Args` entry becomes the
+`description` of that parameter in the input schema. Pass `description` or
+`input_schema` to override either one.
