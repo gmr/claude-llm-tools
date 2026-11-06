@@ -162,3 +162,53 @@ class ParseTestCase(unittest.TestCase):
                 description=None, arguments={'value': 'The value.'}
             ),
         )
+
+    def test_joins_wrapped_lines_within_paragraphs(self):
+        def function():
+            """Add an emoji reaction
+            to a Slack message.
+
+            Use this tool to acknowledge a message
+            without posting a reply.
+
+            """
+
+        self.assertEqual(
+            _parse(function).description,
+            'Add an emoji reaction to a Slack message.\n\n'
+            'Use this tool to acknowledge a message without posting a reply.',
+        )
+
+    def test_keeps_list_items_on_their_own_lines(self):
+        def function():
+            """Summary.
+
+            Modes:
+            - fast, which skips
+            validation
+            - slow
+            1. first
+            2) second
+
+            """
+
+        self.assertEqual(
+            _parse(function).description,
+            'Summary.\n\nModes:\n- fast, which skips validation\n- slow\n'
+            '1. first\n2) second',
+        )
+
+    def test_keeps_indented_lines_and_section_headers(self):
+        def function():
+            """Summary.
+            Example:
+                function(1)
+                function(2)
+            Done.
+
+            """
+
+        self.assertEqual(
+            _parse(function).description,
+            'Summary.\nExample:\n    function(1)\n    function(2)\nDone.',
+        )

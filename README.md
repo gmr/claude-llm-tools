@@ -71,6 +71,6 @@ for block in message.content:
 ### Descriptions
 
 The tool description defaults to the docstring with its `Args`, `Returns`,
-`Yields`, and `Raises` sections removed. Each `Args` entry becomes the
-`description` of that parameter in the input schema. Pass `description` or
-`input_schema` to override either one.
+`Yields`, and `Raises` sections removed and lines wrapped within a paragraph
+joined. Each `Args` entry becomes the `description` of that parameter in the
+input schema. Pass `description` or `input_schema` to override either one.

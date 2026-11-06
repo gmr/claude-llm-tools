@@ -12,6 +12,7 @@ REMOVED_SECTIONS = ARGUMENT_SECTIONS | {
 }
 
 ARGUMENT_PATTERN = re.compile(r'^\**(\w+)\s*(?:\([^)]*\))?:\s*(.*)$')
+LIST_ITEM_PATTERN = re.compile(r'^([-*+]|\d+[.)])\s')
 SECTION_PATTERN = re.compile(r'^(\w+):$')
 
 
@@ -27,7 +28,7 @@ def parse(docstring: str | None) -> Docstring:
     """Parse a cleaned docstring, as returned by ``inspect.getdoc``.
 
     The description is the docstring without its argument, return, yield,
-    and raise sections.
+    and raise sections, with lines wrapped within a paragraph joined.
 
     """
     if not docstring:
@@ -36,8 +37,45 @@ def parse(docstring: str | None) -> Docstring:
     arguments: dict[str, str] = {}
     for name in ARGUMENT_SECTIONS & sections.keys():
         arguments.update(_parse_arguments(sections[name]))
-    description = re.sub(r'\n{3,}', '\n\n', '\n'.join(kept)).strip()
+    description = '\n'.join(_unwrap(kept))
+    description = re.sub(r'\n{3,}', '\n\n', description).strip()
     return Docstring(description=description or None, arguments=arguments)
+
+
+def _unwrap(lines: list[str]) -> list[str]:
+    """Join each wrapped line onto the line before it"""
+    unwrapped: list[str] = []
+    for line in lines:
+        if unwrapped and _continues(unwrapped[-1], line):
+            unwrapped[-1] = f'{unwrapped[-1]} {line.strip()}'
+        else:
+            unwrapped.append(line)
+    return unwrapped
+
+
+def _continues(previous: str, line: str) -> bool:
+    """Whether a line continues the paragraph or list item before it.
+
+    Blank lines, indented lines, list items, and section headers start
+    their own line.
+
+    """
+    return not any(
+        (
+            _stands_alone(previous),
+            _stands_alone(line),
+            LIST_ITEM_PATTERN.match(line),
+        )
+    )
+
+
+def _stands_alone(line: str) -> bool:
+    """Whether a line is blank, indented, or a section header"""
+    return (
+        not line.strip()
+        or line[0].isspace()
+        or SECTION_PATTERN.match(line.rstrip()) is not None
+    )
 
 
 def _split_sections(
