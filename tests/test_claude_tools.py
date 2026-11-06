@@ -53,35 +53,33 @@ class TestCase(unittest.TestCase):
             state.get_tool('unknown-tool')
 
     def test_tools(self):
+        input_schema = {
+            'properties': {
+                'a': {
+                    'description': 'The first number',
+                    'title': 'A',
+                    'type': 'integer',
+                },
+                'b': {
+                    'description': 'The second number',
+                    'title': 'B',
+                    'type': 'integer',
+                },
+            },
+            'required': ['a', 'b'],
+            'type': 'object',
+        }
         expectation = [
             {
-                'description': 'Add two numbers together and return the result'
-                '.\n\nArgs:\n    a: The first number\n    b: Th'
-                'e second number\n\nReturns:\n    The sum of a '
-                'and b',
-                'input_schema': {
-                    'properties': {
-                        'a': {'title': 'A', 'type': 'integer'},
-                        'b': {'title': 'B', 'type': 'integer'},
-                    },
-                    'required': ['a', 'b'],
-                    'type': 'object',
-                },
+                'description': 'Add two numbers together and return the '
+                'result.',
+                'input_schema': input_schema,
                 'name': 'add_numbers',
             },
             {
                 'description': 'Multiply two numbers together and return the '
-                'result.\n\nArgs:\n    a: The first number\n  '
-                '  b: The second number\n\nReturns:\n    The '
-                'product of a and b',
-                'input_schema': {
-                    'properties': {
-                        'a': {'title': 'A', 'type': 'integer'},
-                        'b': {'title': 'B', 'type': 'integer'},
-                    },
-                    'required': ['a', 'b'],
-                    'type': 'object',
-                },
+                'result.',
+                'input_schema': input_schema,
                 'name': 'multiply_numbers',
             },
         ]
@@ -151,6 +149,26 @@ class TestAdditionalCoverage(unittest.TestCase):
         # Verify the tool was added with the custom description
         tool = state.get_tool('sample_function')
         self.assertEqual(tool.description, custom_description)
+
+    def test_add_tool_with_input_schema_skips_signature(self):
+        """An explicit input schema avoids building one from the signature."""
+
+        class Unsupported:
+            pass
+
+        def sample_function(
+            request: claude_llm_tools.Request, param1: Unsupported
+        ) -> str:
+            """Sample function docstring."""
+            return 'Processed'
+
+        custom_schema = jsonschema_models.Schema.model_validate(
+            {'type': 'object', 'properties': {'param1': {'type': 'object'}}}
+        )
+        claude_llm_tools.add_tool(sample_function, input_schema=custom_schema)
+
+        tool = state.get_tool('sample_function')
+        self.assertEqual(tool.input_schema, custom_schema)
 
     def test_add_tool_with_custom_input_schema(self):
         """Test manually adding a tool with a custom input schema."""

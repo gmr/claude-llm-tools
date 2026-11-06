@@ -33,7 +33,7 @@ def add_numbers(req: claude_llm_tools.Request, a: int, b: int) -> int:
 
 @claude_llm_tools.tool(
     name='multiply_numbers',
-    description='Multiply two numbers together and return the product.'
+    description='Multiply two numbers together and return the product.',
 )
 def multiply(req: claude_llm_tools.Request, x: int, y: int) -> int:
     """This docstring will be overridden by the description parameter above."""
@@ -47,22 +47,17 @@ client = anthropic.Anthropic()
 claude_llm_tools.add_tool(..., tool_type='text_editor_20250124')
 
 message = client.messages.create(
-    model="claude-3-7-sonnet-20250219",
+    model='claude-3-7-sonnet-20250219',
     max_tokens=1000,
     temperature=1,
-    system="You are a world-class poet. Respond only with short poems about math.",
+    system='You are a world-class poet. Respond only with short poems about math.',
     messages=[
         {
-            "role": "user",
-            "content": [
-                {
-                    "type": "text",
-                    "text": "Why is the ocean salty?"
-                }
-            ]
+            'role': 'user',
+            'content': [{'type': 'text', 'text': 'Why is the ocean salty?'}],
         }
     ],
-    tools=claude_llm_tools.tools()
+    tools=claude_llm_tools.tools(),
 )
 
 for block in message.content:
@@ -72,3 +67,10 @@ for block in message.content:
         case 'tool_use':
             result = await claude_llm_tools.dispatch(block)
 ```
+
+### Descriptions
+
+The tool description defaults to the docstring with its `Args`, `Returns`,
+`Yields`, and `Raises` sections removed and lines wrapped within a paragraph
+joined. Each `Args` entry becomes the `description` of that parameter in the
+input schema. Pass `description` or `input_schema` to override either one.

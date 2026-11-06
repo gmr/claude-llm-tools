@@ -292,3 +292,36 @@ class TestToJsonSchema(unittest.TestCase):
             },
         }
         self.assertEqual(schema.model_dump(), expected)
+
+    def test_function_with_documented_args(self):
+        """Test that Args descriptions become property descriptions."""
+
+        def test_func(_request: models.Request, a: int, b: str) -> str:
+            """Join a and b.
+
+            Args:
+                _request: The tool request
+                a: The number to join
+                b: The text to join
+
+            """
+            return f'{a} {b}'
+
+        schema = jsonschema.to_schema(test_func)
+        expected = {
+            'type': 'object',
+            'properties': {
+                'a': {
+                    'type': 'integer',
+                    'title': 'A',
+                    'description': 'The number to join',
+                },
+                'b': {
+                    'type': 'string',
+                    'title': 'B',
+                    'description': 'The text to join',
+                },
+            },
+            'required': ['a', 'b'],
+        }
+        self.assertEqual(schema.model_dump(), expected)
