@@ -11,8 +11,6 @@ from claude_llm_tools import docstring, errors, jsonschema, models, state
 
 LOGGER = logging.getLogger(__name__)
 
-Function = typing.TypeVar('Function', bound=typing.Callable[..., typing.Any])
-
 
 def add_tool(
     function: typing.Callable,
@@ -104,7 +102,7 @@ async def dispatch(
     )
 
 
-def tool(
+def tool[Function: typing.Callable[..., typing.Any]](
     function: Function | None = None,
     name: str | None = None,
     description: str | None = None,
